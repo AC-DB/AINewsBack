@@ -1,0 +1,23 @@
+[project]
+name = "ainewsback"
+version = "0.1.0"
+description = "这是AINews后端项目"
+authors = [
+    {name = "L-Win",email = "a-l_l-a@outlook.com"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.121.2,<0.122.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "setuptools (>=80.9.0,<81.0.0)",
+    "wheel (>=0.45.1,<0.46.0)",
+    "email-validator (>=2.3.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
