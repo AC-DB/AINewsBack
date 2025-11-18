@@ -1,42 +1,57 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
-from ainewsback.schemas.base import resp_200, resp_500
+from ainewsback.api.v1.deps import get_user_service
+from ainewsback.schemas.base import resp, resp_200, resp_500
 from ainewsback.schemas.user import LoginAuthRequest, LoginAuthResponse, \
     LoginCodeRequest
-from ainewsback.utils.jwt import JWTUtils
+from ainewsback.services.user_service import UserService
 
 router = APIRouter(prefix="/login", tags=["login"])
 
 
-# 用户密码登录
 @router.post("/login_auth")
-async def login_auth(item: LoginAuthRequest):
-    item_dice = item.model_dump()
-    back = LoginAuthResponse()
-    return resp_200(back)
-
-
-# 发送登录验证码
-@router.get("/send_code")
-async def send_code(phone: str = Query(
-    ..., min_length=11, max_length=15, pattern=r"^\+?\d{11,15}$",
-    title="手机号", description="11-15位，允许+开头")
+async def login_auth(
+        item: LoginAuthRequest,
+        user_service: UserService = Depends(get_user_service)
 ):
-    if phone is not None and phone != "":
-        return resp_200(None, f"验证码发送成功")
+    """用户密码登录"""
+    user, token, error_msg = user_service.authenticate_by_password(
+        phone=item.phone,
+        password=item.password
+    )
 
-    return resp_500(None, f"验证码发送失败")
+    if error_msg:
+        return resp(code=500, message=error_msg)
+
+    return resp_200(LoginAuthResponse(user=user, token=token))
 
 
-# 用户验证码登录
+@router.get("/send_code")
+async def send_code(
+        phone: str = Query(
+            ..., min_length=11, max_length=15, pattern=r"^\+?\d{11,15}$",
+            title="手机号", description="11-15位,允许+开头"
+        ),
+        user_service: UserService = Depends(get_user_service)
+):
+    """发送登录验证码"""
+    success = user_service.send_verification_code(phone)
+
+    if success:
+        return resp_200(None, "验证码发送成功")
+
+    return resp_500(None, "验证码发送失败")
+
+
 @router.post("/code_login")
-async def login_code(item: LoginCodeRequest):
-    item_dice = item.model_dump()
-    phone = item_dice["phone"]
-    code = item_dice["code"]
+async def login_code(
+        item: LoginCodeRequest,
+        user_service: UserService = Depends(get_user_service)
+):
+    """用户验证码登录"""
+    user, token = user_service.authenticate_by_code(
+        phone=item.phone,
+        code=item.code
+    )
 
-    token = JWTUtils.create_token(phone)
-
-    back = LoginAuthResponse(token=token)
-
-    return resp_200(back)
+    return resp_200(LoginAuthResponse(user=user, token=token))

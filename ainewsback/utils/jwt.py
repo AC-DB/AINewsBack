@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta, timezone
+
 import jwt
-from ainewsback.config import settings
+
+from ainewsback.core.config import settings
+
 
 class JWTUtils:
     @staticmethod
     def create_token(data: str) -> str:
         """生成JWT令牌"""
         now = datetime.now(timezone.utc)
-        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = now + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = {
             "sub": data,
             "iat": now,
@@ -16,17 +20,18 @@ class JWTUtils:
             "iss": settings.CURRENT_ISSUER,
             "aud": settings.TOKEN_AUDIENCE,
         }
-        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        return jwt.encode(to_encode, settings.SECRET_KEY,
+                          algorithm=settings.ALGORITHM)
 
     @staticmethod
     def verify_token(token: str) -> dict:
         """验证JWT令牌并返回载荷"""
         try:
             payload = jwt.decode(
-                jwt = token,
-                key = settings.SECRET_KEY,
-                algorithms = [settings.ALGORITHM],
-                options = {
+                jwt=token,
+                key=settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
+                options={
                     "verify_signature": True,
                     "verify_exp": True,
                     "verify_iat": True,
@@ -34,8 +39,8 @@ class JWTUtils:
                     "verify_aud": True,
                     "require": ["sub", "iat", "exp", "jti", "iss", "aud"]
                 },
-                issuer = settings.ACCESS_TOKEN_ISSUER,
-                audience = settings.CURRENT_ISSUER,
+                issuer=settings.ACCESS_TOKEN_ISSUER,
+                audience=settings.CURRENT_ISSUER,
             )
             return payload
         except jwt.ExpiredSignatureError:
@@ -54,4 +59,3 @@ class JWTUtils:
         """从JWT中提取数据"""
         payload = JWTUtils.verify_token(token)
         return payload
-

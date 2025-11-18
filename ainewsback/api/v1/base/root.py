@@ -1,4 +1,4 @@
-from ainewsback.config import settings
+from ainewsback.core.config import settings
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from ainewsback.utils.jwt import JWTUtils

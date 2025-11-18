@@ -11,9 +11,11 @@ class BaseResponseModel(BaseModel, Generic[T]):
     errorMessage: str | None = None
     data: T | None = None
 
+
 def resp(code: int, data: Union[list, dict, str, Any] = None,
-             message: str = 'success') -> BaseResponseModel:
+         message: str = 'success') -> BaseResponseModel:
     return BaseResponseModel(code=code, errorMessage=message, data=data)
+
 
 def resp_200(data: Union[list, dict, str, Any] = None,
              message: str = 'success') -> BaseResponseModel:

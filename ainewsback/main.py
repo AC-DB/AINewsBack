@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from ainewsback.api.v1 import router
-from ainewsback.config import settings
+from ainewsback.core.config import settings
 from ainewsback.middleware import AuthMiddleware
 
 

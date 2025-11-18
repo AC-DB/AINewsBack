@@ -3,6 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from pydantic import MySQLDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,7 +18,8 @@ class PyProjectConfig:
         if cls._cache is not None:
             return cls._cache
 
-        pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+        pyproject_path = Path(
+            __file__).parent.parent.parent / "pyproject.toml"
 
         if not pyproject_path.exists():
             raise FileNotFoundError(
@@ -74,6 +76,10 @@ class PyProjectConfig:
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore',
+                                      case_sensitive=False,
+                                      env_file_encoding="utf-8")
+
     # 项目元数据
     APP_NAME: str = PyProjectConfig.get_name()
     APP_VERSION: str = PyProjectConfig.get_version()
@@ -90,6 +96,24 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8080
 
+    MYSQL_SERVER: str = ""
+    MYSQL_PORT: int = 0
+    MYSQL_USER: str = ""
+    MYSQL_PASSWORD: str = ""
+    MYSQL_DB: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
+        return MySQLDsn.build(
+            scheme="mysql+pymysql",
+            username=self.MYSQL_USER,
+            password=self.MYSQL_PASSWORD,
+            host=self.MYSQL_SERVER,
+            port=self.MYSQL_PORT,
+            path=self.MYSQL_DB,
+        )
+
     # JWT 配置
     SECRET_KEY: str = ""
     ALGORITHM: str = ""
@@ -97,10 +121,6 @@ class Settings(BaseSettings):
     CURRENT_ISSUER: str = ""
     TOKEN_AUDIENCE: list[str] = []
     ACCESS_TOKEN_ISSUER: list[str] = []
-
-    model_config = SettingsConfigDict(env_file='.env', extra='ignore',
-                                      case_sensitive=False,
-                                      env_file_encoding="utf-8")
 
 
 # 创建全局配置实例
