@@ -2,6 +2,7 @@ import tomllib
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -89,8 +90,17 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8080
 
+    # JWT 配置
+    SECRET_KEY: str = ""
+    ALGORITHM: str = ""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 0
+    CURRENT_ISSUER: str = ""
+    TOKEN_AUDIENCE: list[str] = []
+    ACCESS_TOKEN_ISSUER: list[str] = []
+
     model_config = SettingsConfigDict(env_file='.env', extra='ignore',
-                                      case_sensitive=False)
+                                      case_sensitive=False,
+                                      env_file_encoding="utf-8")
 
 
 # 创建全局配置实例
