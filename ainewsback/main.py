@@ -6,31 +6,36 @@ from fastapi import FastAPI
 
 from ainewsback.api.v1 import router
 from ainewsback.core.config import settings
+from ainewsback.core.logger import setup_logging
 from ainewsback.core.reids import AsyncRedisClient
 from ainewsback.middleware import AuthMiddleware
-
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+from ainewsback.middleware.logging_middleware import LoggingMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 启动时
-    logging.info("应用启动，初始化 Redis 连接...")
+
+    # 初始化日志
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
+    logger.info(f"应用启动 - 环境: {settings.APP_ENV}")
+    logger.info(f"当前时间: 2025-11-19 00:17:00 UTC")
+    logger.info(f"当前用户: AC-DB")
+
+    logger.info("应用启动，初始化 Redis 连接...")
     redis_client = await AsyncRedisClient.get_client()
     try:
         await redis_client.ping()
-        logging.info("Redis 连接成功")
+        logger.info("Redis 连接成功")
     except Exception as e:
-        logging.error(f"Redis 连接失败: {e}")
+        logger.error(f"Redis 连接失败: {e}")
 
     yield
 
     # 关闭时
-    logging.info("应用关闭，清理资源...")
+    logger.info("应用关闭，清理资源...")
     await AsyncRedisClient.close()
 
 def create_app():
@@ -46,6 +51,8 @@ def create_app():
 
     # 认证中间件
     _app.add_middleware(AuthMiddleware)
+    # 日志中间件
+    _app.add_middleware(LoggingMiddleware)
     # 注册路由
     _app.include_router(router)
 
@@ -56,4 +63,5 @@ app = create_app()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.HOST, port=settings.PORT,
-                reload=True if settings.APP_ENV == "dev" else False)
+                reload=True if settings.APP_ENV == "dev" else False,
+                log_config=None)

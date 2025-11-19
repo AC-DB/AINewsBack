@@ -71,7 +71,7 @@ class UserService:
         return user, token, ""
 
     async def authenticate_by_code(self, phone: str, code: str) -> tuple[
-        ApUser, str]:
+        Optional[ApUser], Optional[str], str]:
         """
         验证码登录认证(自动注册)
 
@@ -81,11 +81,11 @@ class UserService:
         ok, msg = await self.verification.verify_code(phone, code, "login")
 
         if not ok:
-            raise ValueError(msg)
+            return None, None, msg
 
         user = self.get_user_by_phone(phone)
         if not user:
             user = self.create_user_default(phone)
 
         token = JWTUtils.create_token(str(user.id))
-        return user, token
+        return user, token, ""

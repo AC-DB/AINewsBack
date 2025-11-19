@@ -84,12 +84,12 @@ class VerificationService:
         attempt_key = self._get_attempt_key(mobile, scene)
 
         # 检查验证码是否存在
-        stored_code = self.redis.get(code_key)
+        stored_code = await self.redis.get(code_key)
         if not stored_code:
             return False, "验证码不存在或已过期"
 
         # 检查验证尝试次数
-        attempts = self.redis.get(attempt_key)
+        attempts = await self.redis.get(attempt_key)
         current_attempts = int(attempts) if attempts else 0
 
         if current_attempts >= settings.MAX_VERIFY_ATTEMPTS:

@@ -49,9 +49,12 @@ async def login_code(
         user_service: UserService = Depends(get_user_service)
 ):
     """用户验证码登录"""
-    user, token = user_service.authenticate_by_code(
+    user, token, msg = await user_service.authenticate_by_code(
         phone=item.phone,
         code=item.code
     )
+
+    if msg:
+        return resp(code=500, message=msg)
 
     return resp_200(LoginAuthResponse(user=user, token=token))

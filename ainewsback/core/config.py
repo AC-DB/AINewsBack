@@ -1,7 +1,7 @@
 import tomllib
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import MySQLDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -88,9 +88,25 @@ class Settings(BaseSettings):
     APP_LICENSE: dict = PyProjectConfig.get_license()
 
     # 应用配置
-    APP_ENV: str = "dev"
+    APP_ENV: Literal["dev", "pro", "test"] = "dev"
     DEBUG: bool = False
+
+    # Logging
     LOG_LEVEL: str = "info"
+    LOG_TO_CONSOLE: bool = True
+    LOG_TO_FILE: bool = True
+    LOG_FILE_PATH: str = "logs"
+    LOG_FILE_MAX_BYTES: int = 10485760  # 10MB
+    LOG_FILE_BACKUP_COUNT: int = 10
+    LOG_FORMAT: Literal["json", "text", "colored"] = "json"
+
+    # Access Log
+    ENABLE_ACCESS_LOG: bool = True
+    ACCESS_LOG_PATH: str = "logs/access.log"
+
+    # SQL Log
+    ENABLE_SQL_LOG: bool = False
+    SQL_LOG_LEVEL: str = "INFO"
 
     # 服务器配置
     HOST: str = "0.0.0.0"
