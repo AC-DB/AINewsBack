@@ -32,10 +32,10 @@ async def send_code(
             ..., min_length=11, max_length=15, pattern=r"^\+?\d{11,15}$",
             title="手机号", description="11-15位,允许+开头"
         ),
-        user_service: UserService = Depends(get_user_service)
+        user_service: UserService = Depends(get_user_service),
 ):
     """发送登录验证码"""
-    success = user_service.send_verification_code(phone)
+    success = await user_service.send_verification_code(phone)
 
     if success:
         return resp_200(None, "验证码发送成功")

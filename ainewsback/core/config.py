@@ -114,6 +114,23 @@ class Settings(BaseSettings):
             path=self.MYSQL_DB,
         )
 
+    # 钉钉机器人配置
+    DINGTALK_WEBHOOK_URL: str = ""
+    DINGTALK_SECRET: str = ""
+
+    # 验证码设置
+    CODE_LENGTH: int = 0
+    CODE_EXPIRE_SECONDS: int = 0
+    CODE_RATE_LIMIT: int = 0
+    MAX_VERIFY_ATTEMPTS: int = 0
+
+    # Redis
+    REDIS_HOST: str = ""
+    REDIS_PORT: int = 0
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = ""
+    REDIS_DECODE_RESPONSES: bool = True
+
     # JWT 配置
     SECRET_KEY: str = ""
     ALGORITHM: str = ""
