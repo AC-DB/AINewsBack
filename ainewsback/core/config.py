@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
-from pydantic import MySQLDsn, computed_field
+from pydantic import PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -112,22 +112,22 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8080
 
-    MYSQL_SERVER: str = ""
-    MYSQL_PORT: int = 0
-    MYSQL_USER: str = ""
-    MYSQL_PASSWORD: str = ""
-    MYSQL_DB: str = ""
+    DB_SERVER: str = ""
+    DB_PORT: int = 0
+    DB_USER: str = ""
+    DB_PASSWORD: str = ""
+    DB_NAME: str = ""
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
-        return MySQLDsn.build(
-            scheme="mysql+pymysql",
-            username=self.MYSQL_USER,
-            password=self.MYSQL_PASSWORD,
-            host=self.MYSQL_SERVER,
-            port=self.MYSQL_PORT,
-            path=self.MYSQL_DB,
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        return PostgresDsn.build(
+            scheme="postgresql+psycopg2",
+            username=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_SERVER,
+            port=self.DB_PORT,
+            path=self.DB_NAME,
         )
 
     # 钉钉机器人配置

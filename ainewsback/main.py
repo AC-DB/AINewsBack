@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from ainewsback.api.v1 import router
 from ainewsback.core.config import settings
+from ainewsback.core.database import create_db_and_tables
 from ainewsback.core.logger import setup_logging
 from ainewsback.core.reids import AsyncRedisClient
 from ainewsback.middleware import AuthMiddleware
@@ -24,13 +25,22 @@ async def lifespan(app: FastAPI):
     logger.info(f"当前时间: 2025-11-19 00:17:00 UTC")
     logger.info(f"当前用户: AC-DB")
 
-    logger.info("应用启动，初始化 Redis 连接...")
+    logger.info("初始化数据库连接...")
+    try:
+        create_db_and_tables()
+        logger.info("数据表创建成功")
+    except Exception as e:
+        logger.error(f"数据库初始化失败: {e}")
+        raise
+
+    logger.info("初始化 Redis 连接...")
     redis_client = await AsyncRedisClient.get_client()
     try:
         await redis_client.ping()
         logger.info("Redis 连接成功")
     except Exception as e:
         logger.error(f"Redis 连接失败: {e}")
+        raise
 
     yield
 
